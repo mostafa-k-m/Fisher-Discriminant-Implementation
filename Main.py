@@ -149,7 +149,6 @@ import matplotlib.pylab as plt
 ImagF_crop = crop(ImagF,23,23)
 ImagF_T_crop = crop(ImagF_T,23,23)
 
-%matplotlib inline
 
 for i in range(1,10):
     axes1 = plt.subplot(1, 2, 1)
