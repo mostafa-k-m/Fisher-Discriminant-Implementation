@@ -61,14 +61,13 @@ class One_vs_all_fisher:
       y = np.asarray(np.dot(w.T,test_images.T)).reshape(-1)
       y_all.append(y)
       for image_index in range(len(y)):
+        zscore = np.absolute((y[image_index] - y_mean)/y_std)
         if labels[image_index] in self.classes:
-          zscore = np.absolute((y[image_index] - y_mean)/y_std)
           if zscores[image_index] > zscore:
             labels[image_index] = i
             zscores[image_index] = zscore
         else:
           if y[image_index] > w0:
-            zscore = np.absolute((y[image_index] - y_mean)/y_std)
             labels[image_index] = i
             zscores[image_index] = zscore
     for i in range(len(labels)):
@@ -149,6 +148,7 @@ import matplotlib.pylab as plt
 ImagF_crop = crop(ImagF,23,23)
 ImagF_T_crop = crop(ImagF_T,23,23)
 
+%matplotlib inline
 
 for i in range(1,10):
     axes1 = plt.subplot(1, 2, 1)
