@@ -257,7 +257,7 @@ Accuracy = 100*np.sum(t == lbls_T)/len(lbls_T)
 print(f"Accuracy of predicted labels = {Accuracy}% with image 23 x 23")
 ```
 
-    Accuracy of predicted labels = 75.5% with image 23 x 23
+    Accuracy of predicted labels = 79.0% with image 23 x 23
 
 
 # Confusion matrix and classification report:
@@ -282,37 +282,37 @@ print(classification_report(lbls_T, t))
 
     Confusion Matrix: 
     [[19  0  0  0  0  0  1  0  0  0]
-     [ 3 17  0  0  0  0  0  0  0  0]
-     [ 1  1 17  0  0  0  0  1  0  0]
-     [ 1  1  1 16  0  0  0  0  0  1]
+     [ 0 20  0  0  0  0  0  0  0  0]
+     [ 0  1 18  0  0  0  0  1  0  0]
+     [ 0  1  1 16  0  1  0  0  0  1]
      [ 0  1  1  0 14  1  1  0  1  1]
      [ 0  0  0  1  0 16  1  1  1  0]
      [ 0  0  0  0  1  3 15  1  0  0]
-     [ 2  1  1  0  0  0  0 14  2  0]
+     [ 0  1  1  0  0  0  0 16  2  0]
      [ 1  0  0  2  2  1  0  0 13  1]
-     [ 1  1  0  1  2  0  0  0  5 10]]
+     [ 0  2  0  1  2  0  0  0  4 11]]
     
     
-    Accuracy Score : 0.755
+    Accuracy Score : 0.79
     
     
     Report : 
                   precision    recall  f1-score   support
     
-             0.0       0.68      0.95      0.79        20
-             1.0       0.77      0.85      0.81        20
-             2.0       0.85      0.85      0.85        20
+             0.0       0.95      0.95      0.95        20
+             1.0       0.77      1.00      0.87        20
+             2.0       0.86      0.90      0.88        20
              3.0       0.80      0.80      0.80        20
              4.0       0.74      0.70      0.72        20
-             5.0       0.76      0.80      0.78        20
+             5.0       0.73      0.80      0.76        20
              6.0       0.83      0.75      0.79        20
-             7.0       0.82      0.70      0.76        20
-             8.0       0.59      0.65      0.62        20
-             9.0       0.77      0.50      0.61        20
+             7.0       0.84      0.80      0.82        20
+             8.0       0.62      0.65      0.63        20
+             9.0       0.79      0.55      0.65        20
     
-        accuracy                           0.76       200
-       macro avg       0.76      0.76      0.75       200
-    weighted avg       0.76      0.76      0.75       200
+        accuracy                           0.79       200
+       macro avg       0.79      0.79      0.79       200
+    weighted avg       0.79      0.79      0.79       200
     
 
 
@@ -321,7 +321,7 @@ print(classification_report(lbls_T, t))
 
 ```python
 plt.rcParams["figure.figsize"] = (20,10)
-title = 'Confusion matrix'
+title = 'Confusion Matrix'
 
 cmap = plt.cm.Greens
 classes = np.unique(lbls_T)
