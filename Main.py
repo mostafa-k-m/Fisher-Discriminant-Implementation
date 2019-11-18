@@ -138,7 +138,7 @@ def crop(images,cropx,cropy):
     dimensions = image.shape
     startx = (dimensions[1] - cropx)//2
     starty = (dimensions[0]-cropy)//2
-    cropped_image = image[starty:starty+cropy:,startx:startx+cropx].reshape(1, cropx * cropy)
+    cropped_image = image[starty:(starty + cropy):,startx:(startx + cropx)].reshape(1, cropx * cropy)
     images_cropped[i,:] = cropped_image
 
   return images_cropped
@@ -150,13 +150,17 @@ ImagF_T_crop = crop(ImagF_T,23,23)
 
 %matplotlib inline
 
-for i in range(1,10):
-    axes1 = plt.subplot(1, 2, 1)
-    axes1.imshow(ImagF[220+i*240,:].reshape(28,28))
-    axes1.set_title('Before Pre-Processing')
-    axes2 = plt.subplot(1, 2, 2)
-    axes2.imshow(ImagF_crop[220+i*240,:].reshape(23,23))
-    axes2.set_title('After Pre-Processing')
+for i in range(1,10,2):
+    axes = [plt.subplot(1, 4, i) for i in range(1,5)]
+
+    axes[0].imshow(ImagF[-20+i*240,:].reshape(28,28))
+    axes[1].imshow(ImagF_crop[-20+i*240,:].reshape(23,23))
+    axes[2].imshow(ImagF[-20+(i+1)*240,:].reshape(28,28))
+    axes[3].imshow(ImagF_crop[-20+(i+1)*240,:].reshape(23,23))
+
+    for i in range(0,4):
+        axes[i].set_title('Before Pre-Processing') if i//2 == 0 else axes[i].set_title('After Pre-Processing')
+
     plt.show()
 
 classifier = One_vs_all_fisher(ImagF_crop, lbls)
@@ -174,40 +178,34 @@ cm = confusion_matrix(lbls_T, t)
 
 print('Confusion Matrix: ')
 print(cm)
-print('\n')
-print('Accuracy Score :',accuracy_score(lbls_T, t))
-print('\n')
-print('Report : ')
+print('\n', 'Accuracy Score :',accuracy_score(lbls_T, t))
+print('\n', 'Report : ')
 print(classification_report(lbls_T, t))
 
 
 
-title = 'Confusion matrix'
+title = 'Confusion Matrix'
 
-cmap = plt.cm.Greens
-classes = np.unique(lbls_T)
+classes = np.unique(lbls_T).astype(int)
 
 fig, ax = plt.subplots()
-im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+im = ax.imshow(cm, plt.cm.Greens)
 ax.figure.colorbar(im, ax=ax)
 ax.set(xticks=np.arange(cm.shape[1]),
        yticks=np.arange(cm.shape[0]),
        xticklabels=classes, yticklabels=classes,
        title=title,
-       ylabel='True label',
+       ylabel='Target label',
        xlabel='Predicted label')
 
 ax.margins(y = 5)
 
-plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-         rotation_mode="anchor")
+plt.setp(ax.get_xticklabels(), ha="right")
 
-
-fmt = 'd'
 thresh = cm.max() / 2.
 for i in range(cm.shape[0]):
     for j in range(cm.shape[1]):
-        ax.text(j, i, format(cm[i, j], fmt),
+        ax.text(j, i, format(cm[i, j]),
                 ha="center", va="center",
                 color="white" if cm[i, j] > thresh else "black")
 fig.tight_layout()
