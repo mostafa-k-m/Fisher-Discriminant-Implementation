@@ -1,4 +1,3 @@
-# Assignment 1: Fisher Implementation
 # An overview of our classifier:
 This classifier is going to be a one versus all fisher linear discriminant. It's going to classify numbers from 0 to 9 which means it will have 10 classes.
 
