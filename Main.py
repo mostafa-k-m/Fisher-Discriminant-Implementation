@@ -5,10 +5,10 @@ class One_vs_all_fisher:
   def __init__(self, images, labels):
     self.images = images
     self.labels = labels
-    self.classes = np.unique(labels)
+    self.classes = np.unique(lbls)
     self.train()
 
-    # Function to calculate the mean of the intended class and the mean of other classes
+# Function to calculate the mean of the intended class and the mean of other classes
   def m(self, c1, images_c1, images_c2):
       m1= []
       for i in range(images_c1.shape[1]):
@@ -19,7 +19,7 @@ class One_vs_all_fisher:
           m2.append(np.sum(images_c2[:,i])/images_c2[:,i].shape[0])
       return np.asarray(m1).reshape(1,-1),  np.asarray(m2).reshape(1,-1)
 
-  # Function to calculate the covariance of the intended class and the mean of other classes
+# Function to calculate the covariance of the intended class and the mean of other classes
   def S(self, c1, images_c1, images_c2, means):
     term1 = images_c1 - means[0]
 
@@ -81,30 +81,43 @@ class One_vs_all_fisher:
     return labels
 
 
-from keras.datasets import mnist
-
-# load dataset
-(trainX, trainy), (testX, testy) = mnist.load_data()
-
-def flatten(images):
-    length_of_flattened_image = images.shape[1]*images.shape[2]
-    image_array=np.zeros((images.shape[0],length_of_flattened_image))
-    for i in range(len(images)):
-        image_array[i,:]=images[i].reshape((1,length_of_flattened_image))
-    return image_array
+import os
+import imageio
 
 
-trainX = flatten(trainX)
-testX = flatten(testX)
+home_path = os.getcwd()
+path='./Train'
+os.chdir(path)
+Images=os.listdir()
+
+Images1=sorted(Images, key=lambda t: int(os.path.splitext(t)[0])) # sort them ascendingly
+ImagF=np.zeros((2400,784))  # All Images
+for i in range(len(Images1)):
+    ImagF1=imageio.imread(Images1[i])
+    ImagF[i,:]=ImagF1.reshape((1,784))
 
 
-classifier = One_vs_all_fisher(trainX, trainy)
+os.chdir(home_path)
+lbls=np.loadtxt("Training Labels.txt")
+lbls_T=np.loadtxt("Test Labels.txt")
+path='./Test'
+os.chdir(path)
+Test_Image=os.listdir()
+Test_Image.pop()
+Test_Image1=sorted(Test_Image, key=lambda t: int(os.path.splitext(t)[0]))
+ImagF_T=np.zeros((200,784))
+for i in range(len(Test_Image1)):
+    Imag=imageio.imread(Test_Image1[i])
+    ImagF_T[i,:]=Imag.reshape((1,784))
+
+
+classifier = One_vs_all_fisher(ImagF, lbls)
 # Calculate Predicted labels
-t = classifier.classify(testX)
+t = classifier.classify(ImagF_T)
 
 
 #Calculate Accuracy and Print it
-Accuracy = 100*np.sum(t == testy)/len(testy)
+Accuracy = 100*np.sum(t == lbls_T)/len(lbls_T)
 print(f"Accuracy of predicted labels = {Accuracy}%")
 
 def center(image):
@@ -125,33 +138,35 @@ def crop(images,cropx,cropy):
     dimensions = image.shape
     startx = (dimensions[1] - cropx)//2
     starty = (dimensions[0]-cropy)//2
-    cropped_image = image[starty:starty+cropy:,startx:startx+cropx].reshape(1, cropx * cropy)
+    cropped_image = image[starty:(starty + cropy):,startx:(startx + cropx)].reshape(1, cropx * cropy)
     images_cropped[i,:] = cropped_image
 
   return images_cropped
 
 
-
 import matplotlib.pylab as plt
-trainX_processed = crop(trainX,23,23)
-testX_processed = crop(testX,23,23)
+ImagF_crop = crop(ImagF,23,23)
+ImagF_T_crop = crop(ImagF_T,23,23)
 
 %matplotlib inline
 
-new_dimensions = int(trainX_processed.shape[1]**.5)
-for i in range(1,10):
-    axes1 = plt.subplot(1, 2, 1)
-    axes1.imshow(trainX[220+i*240,:].reshape(28,28))
-    axes1.set_title('Before Pre-Processing')
-    axes2 = plt.subplot(1, 2, 2)
-    axes2.imshow(trainX_processed[220+i*240,:].reshape(new_dimensions,new_dimensions))
-    axes2.set_title('After Pre-Processing')
+for i in range(1,10,2):
+    axes = [plt.subplot(1, 4, i) for i in range(1,5)]
+
+    axes[0].imshow(ImagF[-20+i*240,:].reshape(28,28))
+    axes[1].imshow(ImagF_crop[-20+i*240,:].reshape(23,23))
+    axes[2].imshow(ImagF[-20+(i+1)*240,:].reshape(28,28))
+    axes[3].imshow(ImagF_crop[-20+(i+1)*240,:].reshape(23,23))
+
+    for i in range(0,4):
+        axes[i].set_title('Before Pre-Processing') if i//2 == 0 else axes[i].set_title('After Pre-Processing')
+
     plt.show()
 
-classifier = One_vs_all_fisher(trainX_processed, trainy)
-t = classifier.classify(testX_processed)
+classifier = One_vs_all_fisher(ImagF_crop, lbls)
+t = classifier.classify(ImagF_T_crop)
 
-Accuracy = 100*np.sum(t == testy)/len(testy)
+Accuracy = 100*np.sum(t == lbls_T)/len(lbls_T)
 print(f"Accuracy of predicted labels = {Accuracy}% with image 23 x 23")
 
 
@@ -159,44 +174,41 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 
-cm = confusion_matrix(testy, t)
+cm = confusion_matrix(lbls_T, t)
 
 print('Confusion Matrix: ')
 print(cm)
-print('\n')
-print('Accuracy Score :',accuracy_score(testy, t))
-print('\n')
-print('Report : ')
-print(classification_report(testy, t))
+print('\n', 'Accuracy Score :',accuracy_score(lbls_T, t))
+print('\n', 'Report : ')
+print(classification_report(lbls_T, t))
 
 
 
-title = 'Confusion matrix'
+title = 'Confusion Matrix'
 
-cmap = plt.cm.Greens
-classes = np.unique(testy)
+classes = np.unique(lbls_T).astype(int)
 
 fig, ax = plt.subplots()
-im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
+im = ax.imshow(cm, plt.cm.Greens)
 ax.figure.colorbar(im, ax=ax)
 ax.set(xticks=np.arange(cm.shape[1]),
        yticks=np.arange(cm.shape[0]),
        xticklabels=classes, yticklabels=classes,
        title=title,
-       ylabel='True label',
+       ylabel='Target label',
        xlabel='Predicted label')
 
 ax.margins(y = 5)
 
-plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-         rotation_mode="anchor")
+plt.setp(ax.get_xticklabels(), ha="right")
 
-
-fmt = 'd'
 thresh = cm.max() / 2.
 for i in range(cm.shape[0]):
     for j in range(cm.shape[1]):
-        ax.text(j, i, format(cm[i, j], fmt),
+        ax.text(j, i, format(cm[i, j]),
                 ha="center", va="center",
                 color="white" if cm[i, j] > thresh else "black")
 fig.tight_layout()
+
+os.chdir(home_path)
+fig.savefig('Confusion Matrix.png')
